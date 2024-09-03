@@ -49,7 +49,7 @@ namespace ToDoList.Persistance.Repository
             try
             {
                 _context.Tasks.Add(task);
-                _context.SaveChanges();
+                
             }
             catch (Exception ex)
             {
@@ -60,7 +60,7 @@ namespace ToDoList.Persistance.Repository
 
 
             _context.Tasks.Add(task);
-            _context.SaveChanges();
+            
             
 
         }
@@ -76,7 +76,7 @@ namespace ToDoList.Persistance.Repository
             taskToUpdate.Term = task.Term;
             taskToUpdate.Title = task.Title;
 
-            _context.SaveChanges();
+            
         }
 
         public void Finish(int id, string userId)
@@ -85,7 +85,7 @@ namespace ToDoList.Persistance.Repository
 
             taskToUpdate.IsExecuted = true;
 
-            _context.SaveChanges();
+            
         }
 
         public void Delete(int id, string userId)
@@ -94,7 +94,7 @@ namespace ToDoList.Persistance.Repository
 
             _context.Tasks.Remove(taskToDelete);
 
-            _context.SaveChanges();
+            
         }
     }
 }

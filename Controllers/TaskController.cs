@@ -4,16 +4,20 @@ using ToDoList.Core.ViewModels;
 using ToDoList.Persistance;
 using ToDoList.Persistance.Extensions;
 using ToDoList.Persistance.Repository;
+using ToDoList.Persistance.Services;
 
 namespace ToDoList.Controllers
 {
     [Authorize]
     public class TaskController : Controller
     {
-        private TaskRepository _taskRepository;
+
+
+        private TaskService _taskService;
+
         public TaskController(ApplicationDbContext context)
         {
-            _taskRepository = new TaskRepository(context);
+            _taskService = new TaskService(new UnitOfWork(context));
         }
         public IActionResult Tasks()
         {
@@ -21,8 +25,8 @@ namespace ToDoList.Controllers
             var vm = new TasksViewModel
             {
                 FilterTasks = new ToDoList.Core.Models.FilterTasks(),
-                Tasks = _taskRepository.Get(userId),
-                Categories = _taskRepository.GetCategories()
+                Tasks = _taskService.Get(userId),
+                Categories = _taskService.GetCategories()
             };
             return View(vm);
         }
@@ -31,7 +35,7 @@ namespace ToDoList.Controllers
         {
             var userId = User.GetUserId();
 
-            var tasks = _taskRepository.Get(userId,
+            var tasks = _taskService.Get(userId,
                 viewModel.FilterTasks.IsExecuted,
                 viewModel.FilterTasks.CategoryId,
                 viewModel.FilterTasks.Title);
@@ -43,14 +47,14 @@ namespace ToDoList.Controllers
             var userId = User.GetUserId();
 
             var task = id == 0 ?
-                new ToDoList.Core.Models.Domains.Task { Id = 0, UserId = userId, Term = DateTime.Today } : _taskRepository.Get(id, userId);
+                new ToDoList.Core.Models.Domains.Task { Id = 0, UserId = userId, Term = DateTime.Today } : _taskService.Get(id, userId);
 
             var vm = new TaskViewModel()
             {
                 Task = task,
                 Heading = id == 0 ?
                 "Dodawanie nowego zadania" : "Edytowanie nowego zadania",
-                Categories = _taskRepository.GetCategories()
+                Categories = _taskService.GetCategories()
             };
             return View(vm);
         }
@@ -68,21 +72,83 @@ namespace ToDoList.Controllers
                     Task = task,
                     Heading = task.Id == 0 ?
                 "Dodawanie nowego zadania" : "Edytowanie nowego zadania",
-                    Categories = _taskRepository.GetCategories()
+                    Categories = _taskService.GetCategories()
                 };
                 return View("Task", vm);
             }
 
             if (task.Id == 0)
             {
-                _taskRepository.Add(task);
+                _taskService.Add(task);
             }
             else
             {
-                _taskRepository.Update(task);
+                _taskService.Update(task);
+
             }
 
             return RedirectToAction("Tasks");
+        }
+
+        private IActionResult Tasks1()
+        {
+            var userId = User.GetUserId();
+            var vm = new TasksViewModel
+            {
+                FilterTasks = new ToDoList.Core.Models.FilterTasks(),
+                Tasks = _taskService.Get(userId),
+                Categories = _taskService.GetCategories()
+            };
+            return View(vm);
+        }
+
+        private IActionResult Task1(int id = 0)
+        {
+            var userId = User.GetUserId();
+
+            var task = id == 0 ?
+                new ToDoList.Core.Models.Domains.Task { Id = 0, UserId = userId, Term = DateTime.Today } : _taskService.Get(id, userId);
+
+            var vm = new TaskViewModel()
+            {
+                Task = task,
+                Heading = id == 0 ?
+                "Dodawanie nowego zadania" : "Edytowanie nowego zadania",
+                Categories = _taskService.GetCategories()
+            };
+            return View(vm);
+        }
+
+        [HttpPost]
+        private IActionResult Delete1(int id)
+        {
+            try
+            {
+                var userId = User.GetUserId();
+                _taskService.Finish(id, userId);
+            }
+            catch (Exception ex)
+            {
+                //logowanie
+                return Json(new { success = false, message = ex.Message });
+            }
+            return Json(new { success = true });
+        }
+
+        [HttpPost]
+        private IActionResult Finish1(int id)
+        {
+            try
+            {
+                var userId = User.GetUserId();
+                _taskService.Finish(id, userId);
+            }
+            catch (Exception ex)
+            {
+                //logowanie
+                return Json(new { success = false, message = ex.Message });
+            }
+            return Json(new { success = true });
         }
 
         [HttpPost]
@@ -91,7 +157,7 @@ namespace ToDoList.Controllers
             try
             {
                 var userId = User.GetUserId();
-                _taskRepository.Finish(id, userId);
+                _taskService.Finish(id, userId);
             }
             catch (Exception ex)
             {
@@ -107,7 +173,7 @@ namespace ToDoList.Controllers
             try
             {
                 var userId = User.GetUserId();
-                _taskRepository.Finish(id, userId);
+                _taskService.Finish(id, userId);
             }
             catch (Exception ex)
             {
@@ -116,6 +182,10 @@ namespace ToDoList.Controllers
             }
             return Json(new { success = true });
         }
+
+
+
     }
+
 }
 
