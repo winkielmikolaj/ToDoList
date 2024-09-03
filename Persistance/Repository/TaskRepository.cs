@@ -45,9 +45,26 @@ namespace ToDoList.Persistance.Repository
 
         public void Add(Core.Models.Domains.Task task)
         {
+
+            try
+            {
+                _context.Tasks.Add(task);
+                _context.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                // Log or inspect the exception details
+                Console.WriteLine(ex.Message);
+            }
+
+
+
             _context.Tasks.Add(task);
             _context.SaveChanges();
+            
+
         }
+
 
         public void Update(Core.Models.Domains.Task task)
         {
@@ -64,12 +81,20 @@ namespace ToDoList.Persistance.Repository
 
         public void Finish(int id, string userId)
         {
-            throw new NotImplementedException();
+            var taskToUpdate = _context.Tasks.Single(x => x.Id == id && x.UserId == userId);
+
+            taskToUpdate.IsExecuted = true;
+
+            _context.SaveChanges();
         }
 
         public void Delete(int id, string userId)
         {
+            var taskToDelete = _context.Tasks.Single(x => x.Id == id && x.UserId==userId);
 
+            _context.Tasks.Remove(taskToDelete);
+
+            _context.SaveChanges();
         }
     }
 }
