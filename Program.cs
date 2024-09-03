@@ -31,7 +31,6 @@ namespace ToDoList
             else
             {
                 app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 
@@ -42,9 +41,17 @@ namespace ToDoList
 
             app.UseAuthorization();
 
+            // Domyœlna trasa zaktualizowana na now¹ nazwê akcji
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Task}/{action=Tasks}/{id?}");
+                pattern: "{controller=Task}/{action=ListTasks}/{id?}");
+
+            // Mo¿esz dodaæ dodatkowe trasy, jeœli potrzebujesz specyficznych œcie¿ek
+            app.MapControllerRoute(
+                name: "editTask",
+                pattern: "tasks/edit/{id?}",
+                defaults: new { controller = "Task", action = "EditTask" });
+
             app.MapRazorPages();
 
             app.Run();
